@@ -6,21 +6,21 @@ from transformers import AutoModel
 
 
 def auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
-    # transformer.word_embeddings 占用1层
-    # transformer.final_layernorm 和 lm_head 占用1层
-    # transformer.layers 占用 28 层
-    # 总共30层分配到num_gpus张卡上
+    # transformer.word_embeddings Occupying 1 layer
+    # transformer.final_layernorm and lm_head Occupying 1 layer
+    # transformer.layers Occupying 28 layers.
+    # Distributing a total of 30 layers across num_gpus cards.
     num_trans_layers = 28
     per_gpu_layers = 30 / num_gpus
 
-    # bugfix: 在linux中调用torch.embedding传入的weight,input不在同一device上,导致RuntimeError
-    # windows下 model.device 会被设置成 transformer.word_embeddings.device
-    # linux下 model.device 会被设置成 lm_head.device
-    # 在调用chat或者stream_chat时,input_ids会被放到model.device上
-    # 如果transformer.word_embeddings.device和model.device不同,则会导致RuntimeError
-    # 因此这里将transformer.word_embeddings,transformer.final_layernorm,lm_head都放到第一张卡上
-    # 本文件来源于https://github.com/THUDM/ChatGLM-6B/blob/main/utils.py
-    # 仅此处做少许修改以支持ChatGLM2
+    # bugfix: Calling torch.embedding with weight and input not on the same device in Linux causes a RuntimeError.
+    # windows下 model.device It will be set as. transformer.word_embeddings.device
+    # linux下 model.device It will be set as. lm_head.device
+    # When calling chat or translate. stream_chat during translation,input_ids It will be placed in.model.device on top.
+    # If transformer.word_embeddings.device和model.device different,then it will result in RuntimeError
+    # Therefore, here it will. transformer.word_embeddings,transformer.final_layernorm,lm_head all placed on the first card.
+    # This file is sourced from https://github.com/THUDM/ChatGLM-6B/blob/main/utils.py
+    # Only slight modifications were made here to support ChatGLM2
     device_map = {
         'transformer.embedding.word_embeddings': 0,
         'transformer.encoder.final_layernorm': 0,

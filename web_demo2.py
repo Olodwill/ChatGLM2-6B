@@ -4,7 +4,7 @@ from streamlit_chat import message
 
 
 st.set_page_config(
-    page_title="ChatGLM2-6b 演示",
+    page_title="ChatGLM2-6b Demo",
     page_icon=":robot:",
     layout='wide'
 )
@@ -14,7 +14,7 @@ st.set_page_config(
 def get_model():
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
     model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).cuda()
-    # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
+    # Multiple GPU support, replace the line above with the following two lines, and change num_gpus to the actual number of your GPUs.
     # from utils import load_model_on_gpus
     # model = load_model_on_gpus("THUDM/chatglm2-6b", num_gpus=2)
     model = model.eval()
@@ -39,7 +39,7 @@ def predict(input, max_length, top_p, temperature, history=None):
                 message(response, avatar_style="bottts", key=str(i))
 
         message(input, avatar_style="big-smile", key=str(len(history)) + "_user")
-        st.write("AI正在回复:")
+        st.write("AI is replying:")
         with st.empty():
             for response, history in model.stream_chat(tokenizer, input, history, max_length=max_length, top_p=top_p,
                                                temperature=temperature):
@@ -52,9 +52,9 @@ def predict(input, max_length, top_p, temperature, history=None):
 container = st.container()
 
 # create a prompt text for the text generation
-prompt_text = st.text_area(label="用户命令输入",
+prompt_text = st.text_area(label="User command input",
             height = 100,
-            placeholder="请在这儿输入您的命令")
+            placeholder="Please enter your command here.")
 
 max_length = st.sidebar.slider(
     'max_length', 0, 32768, 8192, step=1
@@ -69,7 +69,7 @@ temperature = st.sidebar.slider(
 if 'state' not in st.session_state:
     st.session_state['state'] = []
 
-if st.button("发送", key="predict"):
-    with st.spinner("AI正在思考，请稍等........"):
+if st.button("Send.", key="predict"):
+    with st.spinner("AI is thinking.，Please wait........."):
         # text generation
         st.session_state["state"] = predict(prompt_text, max_length, top_p, temperature, st.session_state["state"])
